@@ -21,15 +21,15 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.ws.rs.core.Response;
-import java.util.UUID;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,28 +50,9 @@ public class ControllerTest extends BaseIntegrationTest {
     @Value("${keycloak.realm}")
     private String realmItm;
 
-    private UserRequest okUserRequest;
-    private UserRequest badUserRequest;
 
-    //добавляем объекты классов кейклока
-    private RealmResource realmResourceMock;
-    private UsersResource usersResourceMock;
-    private UserRepresentation userRepresentationMock;
-    private UserResource userResourceMock;
-
-
-    @BeforeEach
-//НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
-    void preStartTestSettings() {
-        okUserRequest = new UserRequest("username", "user@mail.ru", "userpassword", "Patriсk", "Bateman");
-        badUserRequest = new UserRequest("u", "", "_", "Patriсk", "Bateman");
-
-        realmResourceMock = mock(RealmResource.class);
-        usersResourceMock = mock(UsersResource.class);
-        userRepresentationMock = mock(UserRepresentation.class);
-        userResourceMock = mock(UserResource.class);
-        //мокаем все что будем использовать
-    }
+//    @BeforeEach
+////НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
 
     @Test
     @SneakyThrows
@@ -91,4 +72,20 @@ public class ControllerTest extends BaseIntegrationTest {
                 .andExpect(content().string(containsString("gleb")));
     }
 
+    @Test
+    public void userFormTest() { //проверка шаблона формы по http://backend-gateway-client:9090/api/users/hello/ UUID
+        JsonObject jsonObject = Json.createObjectBuilder()
+                .add("firstName", "")
+                .add("lastName", "")
+                .add("email", JsonValue.NULL)
+                .add("roles", Json.createArrayBuilder().add("default-roles-itm"))
+                .add("groups", Json.createArrayBuilder().add("Moderators"))
+                .build();
+
+        assertTrue(jsonObject.containsKey("firstName"));
+        assertTrue(jsonObject.containsKey("lastName"));
+        assertTrue(jsonObject.containsKey("email"));
+        assertTrue(jsonObject.containsKey("roles"));
+        assertTrue(jsonObject.containsKey("groups"));
+    }
 }
