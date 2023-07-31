@@ -7,6 +7,10 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,14 +19,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockHttpServletRequestDsl;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.BDDAssertions.and;
+import javax.ws.rs.core.Response;
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,12 +53,24 @@ public class ControllerTest extends BaseIntegrationTest {
     private UserRequest okUserRequest;
     private UserRequest badUserRequest;
 
+    //добавляем объекты классов кейклока
+    private RealmResource realmResourceMock;
+    private UsersResource usersResourceMock;
+    private UserRepresentation userRepresentationMock;
+    private UserResource userResourceMock;
+
 
     @BeforeEach
 //НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
     void preStartTestSettings() {
         okUserRequest = new UserRequest("username", "user@mail.ru", "userpassword", "Patriсk", "Bateman");
         badUserRequest = new UserRequest("u", "", "_", "Patriсk", "Bateman");
+
+        realmResourceMock = mock(RealmResource.class);
+        usersResourceMock = mock(UsersResource.class);
+        userRepresentationMock = mock(UserRepresentation.class);
+        userResourceMock = mock(UserResource.class);
+        //мокаем все что будем использовать
     }
 
     @Test
@@ -65,16 +84,11 @@ public class ControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void helloMethodShouldBeOk1() throws Exception{
-       this.mockMvc.perform(get("/api/users/hello"))
-               .andDo(print())
-               .andExpect(status().isOk())  //andExpect обертка над asserThat //ожидаем статус 200 по гет запросу на указанный адрес
-               .andExpect(content().string(containsString("gleb")));
+    public void helloMethodShouldBeOk1() throws Exception {
+        this.mockMvc.perform(get("/api/users/hello"))
+                .andDo(print())
+                .andExpect(status().isOk())  //andExpect обертка над asserThat //ожидаем статус 200 по гет запросу на указанный адрес
+                .andExpect(content().string(containsString("gleb")));
     }
 
-    @Test
-    @SneakyThrows
-    public void userCreateTestShouldBeSuccessful(){
-
-    }
 }
