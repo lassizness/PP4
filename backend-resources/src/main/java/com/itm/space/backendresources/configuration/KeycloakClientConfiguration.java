@@ -11,7 +11,7 @@ import static org.keycloak.OAuth2Constants.PASSWORD;
 
 @Configuration
 public class KeycloakClientConfiguration {
-    @Value("${keycloak.credentials.secret}")
+    @Value("${keycloak.credentials.secret}") //извлекаем значения из соответствующих полей
     private String secretKey;
     @Value("${keycloak.resource}")
     private String clientId;
@@ -28,6 +28,7 @@ public class KeycloakClientConfiguration {
                 .grantType(CLIENT_CREDENTIALS)
                 .clientId(clientId)
                 .clientSecret(secretKey)
-                .build();
+                .build(); //установили значения для экземпляра Кейлока
     }
 }
+

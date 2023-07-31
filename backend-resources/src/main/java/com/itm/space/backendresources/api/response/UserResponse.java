@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class UserResponse {
+public class UserResponse { //ответ
     private final String firstName;
     private final String lastName;
     private final String email;

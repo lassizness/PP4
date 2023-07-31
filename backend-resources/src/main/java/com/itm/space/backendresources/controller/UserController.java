@@ -21,20 +21,20 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
+@RequiredArgsConstructor  //Эта аннотация создает конструктор, который принимает все final поля класса в качестве параметров. В данном случае, создается конструктор, который принимает объект UserService в качестве параметра.
 public class UserController {
     private final UserService userService;
 
-    @PostMapping
-    @Secured("ROLE_MODERATOR")
-    @SecurityRequirement(name = "oauth2_auth_code")
+    @PostMapping //Эта аннотация указывает, что метод create будет обрабатывать HTTP POST запросы.
+    @Secured("ROLE_MODERATOR") // метод create доступен только для пользователей с ролью "ROLE_MODERATOR".
+    @SecurityRequirement(name = "oauth2_auth_code") // метод create требует аутентификации с использованием OAuth 2.0 с авторизационным кодом.
     public void create(@RequestBody @Valid UserRequest userRequest) {
-        userService.createUser(userRequest);
+        userService.createUser(userRequest); //Метод будет использоваться для создания нового пользователя с использованием данных из userRequest.
     }
 
-    @GetMapping("/{id}")
-    @Secured("ROLE_MODERATOR")
-    @SecurityRequirement(name = "oauth2_auth_code")
+    @GetMapping("/{id}") //метод getUserById будет обрабатывать HTTP GET запросы с переменной пути "id".
+    @Secured("ROLE_MODERATOR") //метод getUserById доступен только для пользователей с ролью "ROLE_MODERATOR".
+    @SecurityRequirement(name = "oauth2_auth_code") //требует аутентификации с использованием OAuth 2.0 с авторизационным кодом.
     public UserResponse getUserById(@PathVariable UUID id) {
         return userService.getUserById(id);
     }
@@ -43,6 +43,7 @@ public class UserController {
     @Secured("ROLE_MODERATOR")
     @SecurityRequirement(name = "oauth2_auth_code")
     public String hello() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        return SecurityContextHolder.getContext().getAuthentication().getName(); // Возвращается имя аутентифицированного пользователя,
+        // полученное из объекта SecurityContextHolder. Это позволяет получить имя пользователя, который выполнил текущий запрос.
     }
 }

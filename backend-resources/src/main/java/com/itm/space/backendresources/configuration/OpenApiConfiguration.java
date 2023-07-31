@@ -11,19 +11,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@SecurityScheme(
-        name = "oauth2_auth_code",
-        type = SecuritySchemeType.OAUTH2,
-        flows = @OAuthFlows(
+@SecurityScheme( //конфигурация для определелния схемы безопасности Эта конфигурация используется для аутентификации с помощью протокола OAuth 2.0.
+        name = "oauth2_auth_code", // имя схемы безопасности как "oauth2_auth_code".
+        type = SecuritySchemeType.OAUTH2, //тип схемы безопасности - OAuth 2.0.
+        flows = @OAuthFlows( //потоки OAuth для схемы безопасности
                 authorizationCode = @OAuthFlow(
-                        authorizationUrl = "http://backend-keycloak-auth:8080/auth/realms/ITM/protocol/openid-connect/auth",
-                        tokenUrl = "http://backend-keycloak-auth:8080/auth/realms/ITM/protocol/openid-connect/token",
+                        authorizationUrl = "http://backend-keycloak-auth:8080/auth/realms/ITM/protocol/openid-connect/auth", //Указывает URL, где пользователь может авторизовать приложение
+                        tokenUrl = "http://backend-keycloak-auth:8080/auth/realms/ITM/protocol/openid-connect/token", //  URL, где приложение может получить токен доступа
                         scopes = {
-                                @OAuthScope(name = "openid", description = "Read access")
+                                @OAuthScope(name = "openid", description = "Read access") //Указывает области, которые приложение может запрашивать.
                         }
                 )
         ),
-        in = SecuritySchemeIn.HEADER
+        in = SecuritySchemeIn.HEADER //указывает, что схема безопасности применяется в заголовке запроса.
 )
 public class OpenApiConfiguration {
 
