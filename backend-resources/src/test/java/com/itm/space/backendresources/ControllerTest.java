@@ -19,11 +19,16 @@ import org.springframework.test.web.servlet.MockHttpServletRequestDsl;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.BDDAssertions.and;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc //спринг автоматически создает структуру классов которая подменяет слой MVС
 @WithMockUser(username = "gleb", password = "gleb", authorities = "ROLE_MODERATOR")
 public class ControllerTest extends BaseIntegrationTest {
     @MockBean
@@ -57,6 +62,19 @@ public class ControllerTest extends BaseIntegrationTest {
         MockHttpServletResponse response = mockMvc.perform(get("/api/users/hello")).andReturn().getResponse();
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals("gleb", response.getContentAsString());
+    }
+
+    @Test
+    public void helloMethodShouldBeOk1() throws Exception{
+       this.mockMvc.perform(get("/api/users/hello"))
+               .andDo(print())
+               .andExpect(status().isOk())  //andExpect обертка над asserThat //ожидаем статус 200 по гет запросу на указанный адрес
+               .andExpect(content().string(containsString("gleb")));
+    }
+
+    @Test
+    @SneakyThrows
+    public void userCreateTestShouldBeSuccessful(){
 
     }
 }
