@@ -25,11 +25,11 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping //Эта аннотация указывает, что метод create будет обрабатывать HTTP POST запросы.
-    @Secured("ROLE_MODERATOR") // метод create доступен только для пользователей с ролью "ROLE_MODERATOR".
-    @SecurityRequirement(name = "oauth2_auth_code") // метод create требует аутентификации с использованием OAuth 2.0 с авторизационным кодом.
+    @PostMapping
+    @Secured("ROLE_MODERATOR")
+    @SecurityRequirement(name = "oauth2_auth_code")
     public void create(@RequestBody @Valid UserRequest userRequest) {
-        userService.createUser(userRequest); //Метод будет использоваться для создания нового пользователя с использованием данных из userRequest.
+        userService.createUser(userRequest);
     }
 
     @GetMapping("/{id}") //метод getUserById будет обрабатывать HTTP GET запросы с переменной пути "id".
