@@ -2,7 +2,6 @@ package com.itm.space.backendresources;
 
 import com.itm.space.backendresources.api.request.UserRequest;
 import com.itm.space.backendresources.api.response.UserResponse;
-import com.itm.space.backendresources.controller.RestExceptionHandler;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,50 +9,31 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.GroupRepresentation;
-import org.keycloak.representations.idm.MappingsRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
 import javax.ws.rs.core.Response;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc //спринг автоматически создает структуру классов которая подменяет слой MVС
+//@SpringBootTest
+//@AutoConfigureMockMvc //спринг автоматически создает структуру классов которая подменяет слой MVС
 @WithMockUser(username = "gleb", password = "gleb", authorities = "ROLE_MODERATOR")
 public class ControllerTest extends BaseIntegrationTest {
 
@@ -64,9 +44,6 @@ public class ControllerTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private RestExceptionHandler restExceptionHandler;
 
     private final String USERNAME = "gleb";
     private final String PASSWORD = "gleb";
@@ -94,7 +71,6 @@ public class ControllerTest extends BaseIntegrationTest {
                 .andExpect(content().string(containsString("gleb")));
     }
 
-
     private RealmResource realmResource;
     private UsersResource usersResource;
     private Response response;
@@ -105,23 +81,14 @@ public class ControllerTest extends BaseIntegrationTest {
     private UserResource userResource;
     private UserRepresentation userRepresentation;
 
-    private List<RoleRepresentation> userRolesMock;
-    private List<GroupRepresentation> userGroupsMock;
-
     @BeforeEach
     void init() {
         realmResource = mock(RealmResource.class);
         usersResource = mock(UsersResource.class);
         response = mock(Response.class);
-
         userRequest = new UserRequest("gleb", "test@mail.ru", "gleb", "Gleb", "Emelyanov");
-
         userResource = mock(UserResource.class);
         userRepresentation = mock(UserRepresentation.class);
-
-        userRolesMock = mock(List.class);
-        userGroupsMock = mock(List.class);
-
     }
 
     @Test
@@ -136,9 +103,6 @@ public class ControllerTest extends BaseIntegrationTest {
                 .andExpect(status().is(200))
                 .andDo(print())
                 .andReturn();
-
-//        System.out.println("" + mvcResult.getContentLength());
-//        assertThat(mvcResult.getContentLength());
         verify(usersResource).create(any(UserRepresentation.class));
     }
 
@@ -147,10 +111,11 @@ public class ControllerTest extends BaseIntegrationTest {
     public void validationErrorWhenCreatedUserByModerator() {
         UserRequest request = new UserRequest("g", "", "g", "Gleb", "Emelyanov");
         mvc.perform(requestWithContent(post("/api/users"),
-                request)).andDo(print()).andExpect(status().is(400)).andReturn().getResponse();
-
+                request))
+                .andDo(print())
+                .andExpect(status().is(400))
+                .andReturn().getResponse();
     }
-
 
     @Test
     public void helloMethodShouldBeOk3() throws Exception {
@@ -160,43 +125,29 @@ public class ControllerTest extends BaseIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-
     @Test
     public void successfulGetUserByIdByModerator() throws Exception {
         String id = "3d40251d-829c-454e-b389-ec5e9c38a4cc";
         when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
         when(realmResource.users()).thenReturn(usersResource);
-
         when(realmResource.users().get(eq(id))).thenReturn(userResource);
         when(userResource.toRepresentation()).thenReturn(userRepresentation);
         when(userRepresentation.getId()).thenReturn(id);
-
         this.mvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().is(500))
                 .andDo(print());
-
-        /**Рабочий вариант, но ждем 500ую вместо ролей и групп, потомучто они не заданы*/
-
-        /**не рабочий вариант но с попыткой реализовать листы ролей и групп*/
-//        Mockito.when(keycloak.realm(Mockito.anyString()).users().get(Mockito.anyString()).roles().getAll().getRealmMappings())
-//                .thenReturn(userRolesMock);
-//        Mockito.when(keycloak.realm(Mockito.anyString()).users().get(Mockito.anyString()).groups())
-//                .thenReturn(userGroupsMock);
+        /**Рабочий вариант, юзер ловится по ID, но ждем 500ую вместо ролей и групп, потомучто они не заданы*/
     }
 
     @Test
-    public void unsuccessfulGetUserByIdByModerator() throws Exception {
-        String id = null;
+    public void unsuccessful404GetUserByIdByModerator() throws Exception {
+        String id = "";
         when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
         when(realmResource.users()).thenReturn(usersResource);
-
         when(realmResource.users().get(eq(id))).thenReturn(userResource);
-        when(userResource.toRepresentation()).thenReturn(userRepresentation);
-        when(userRepresentation.getId()).thenReturn(id);
-
         this.mvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().is(404))
                 .andDo(print());
-
     }
+    /**Рабочий вариант, подается не валидный ID и ожидаю ошибку*/
 }
