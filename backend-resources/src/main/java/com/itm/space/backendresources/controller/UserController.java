@@ -32,9 +32,9 @@ public class UserController {
         userService.createUser(userRequest);
     }
 
-    @GetMapping("/{id}") //метод getUserById будет обрабатывать HTTP GET запросы с переменной пути "id".
-    @Secured("ROLE_MODERATOR") //метод getUserById доступен только для пользователей с ролью "ROLE_MODERATOR".
-    @SecurityRequirement(name = "oauth2_auth_code") //требует аутентификации с использованием OAuth 2.0 с авторизационным кодом.
+    @GetMapping("/{id}")
+    @Secured("ROLE_MODERATOR")
+    @SecurityRequirement(name = "oauth2_auth_code")
     public UserResponse getUserById(@PathVariable UUID id) {
         return userService.getUserById(id);
     }
@@ -44,6 +44,6 @@ public class UserController {
     @SecurityRequirement(name = "oauth2_auth_code")
     public String hello() {
         return SecurityContextHolder.getContext().getAuthentication().getName(); // Возвращается имя аутентифицированного пользователя,
-        // полученное из объекта SecurityContextHolder. Это позволяет получить имя пользователя, который выполнил текущий запрос.
+
     }
 }

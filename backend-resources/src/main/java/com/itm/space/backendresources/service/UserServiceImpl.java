@@ -46,20 +46,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getUserById(UUID id) { //Это объявление метода getUserById, который принимает объект UUID в качестве параметра и возвращает объект UserResponse. Метод будет использоваться для получения информации о пользователе по его идентификатору.
-        UserRepresentation userRepresentation; //Объявляется переменная userRepresentation типа UserRepresentation, которая будет использоваться для хранения представления пользователя.
-        List<RoleRepresentation> userRoles; //Объявляется переменная userRoles типа List<RoleRepresentation>, которая будет использоваться для хранения списка ролей пользователя.
-        List<GroupRepresentation> userGroups; //Объявляется переменная userGroups типа List<GroupRepresentation>, которая будет использоваться для хранения списка групп, к которым принадлежит пользователь.
+    public UserResponse getUserById(UUID id) {
+        UserRepresentation userRepresentation;
+        List<RoleRepresentation> userRoles;
+        List<GroupRepresentation> userGroups;
         try {
-            userRepresentation = keycloakClient.realm(realm).users().get(String.valueOf(id)).toRepresentation(); //Получается представление пользователя с помощью метода toRepresentation(), вызванного на объекте get(String.valueOf(id)) объекта users() объекта realm объекта keycloakClient. Результат сохраняется в переменную userRepresentation.
+            userRepresentation = keycloakClient.realm(realm).users().get(String.valueOf(id)).toRepresentation();
             userRoles = keycloakClient.realm(realm)
-                    .users().get(String.valueOf(id)).roles().getAll().getRealmMappings(); //Получается список ролей пользователя с помощью метода getRealmMappings(), вызванного на объекте getAll() объекта roles() объекта get(String.valueOf(id)) объекта users() объекта realm объекта keycloakClient. Результат сохраняется в переменную userRoles.
-            userGroups = keycloakClient.realm(realm).users().get(String.valueOf(id)).groups(); //Получается список групп, к которым принадлежит пользователь, с помощью метода groups(), вызванного на объекте get(String.valueOf(id)) объекта users() объекта realm объекта keycloakClient. Результат сохраняется в переменную userGroups.
+                    .users().get(String.valueOf(id)).roles().getAll().getRealmMappings();
+            userGroups = keycloakClient.realm(realm).users().get(String.valueOf(id)).groups();
         } catch (RuntimeException ex) {
             log.error("Exception on \"getUserById\": ", ex);
-            throw new BackendResourcesException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR); //В случае возникновения исключения типа RuntimeException, выполняется блок кода внутри catch. В данном случае, исключение будет обработано и выброшено новое исключение BackendResourcesException с сообщением и статусом из исходного исключения.
+            throw new BackendResourcesException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return userMapper.userRepresentationToUserResponse(userRepresentation, userRoles, userGroups);//Возвращается результат вызова метода userRepresentationToUserResponse объекта userMapper, который принимает представление пользователя, список ролей и список групп в качестве параметров и возвращает объект UserResponse.
+        return userMapper.userRepresentationToUserResponse(userRepresentation, userRoles, userGroups);
     }
 
     private CredentialRepresentation preparePasswordRepresentation(String password) { //Метод будет использоваться для подготовки представления пароля.
