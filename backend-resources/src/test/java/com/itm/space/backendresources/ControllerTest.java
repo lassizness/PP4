@@ -74,7 +74,7 @@ public class ControllerTest extends BaseIntegrationTest {
     public ControllerTest() {
     }
     //    @BeforeEach
-////НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
+//НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
 
     @Test
     @SneakyThrows
@@ -90,64 +90,9 @@ public class ControllerTest extends BaseIntegrationTest {
     public void helloMethodShouldBeOk2() throws Exception {
         this.mockMvc.perform(get("/api/users/hello"))
                 .andDo(print())
-                .andExpect(status().isOk())  //andExpect обертка над asserThat //ожидаем статус 200 по гет запросу на указанный адрес
+                .andExpect(status().isOk())
                 .andExpect(content().string(containsString("gleb")));
     }
-
-//    @Test
-//    public void userFormTest() { //проверка шаблона формы(Response)  по http://backend-gateway-client:9090/api/users/hello/ UUID
-//        JsonObject jsonObject = Json.createObjectBuilder()
-//                .add("firstName", "")
-//                .add("lastName", "")
-//                .add("email", JsonValue.NULL)
-//                .add("roles", Json.createArrayBuilder().add("default-roles-itm"))
-//                .add("groups", Json.createArrayBuilder().add("Moderators"))
-//                .build();
-//
-//        assertTrue(jsonObject.containsKey("firstName"));
-//        assertTrue(jsonObject.containsKey("lastName"));
-//        assertTrue(jsonObject.containsKey("email"));
-//        assertTrue(jsonObject.containsKey("roles"));
-//        assertTrue(jsonObject.containsKey("groups"));
-//    }
-
-
-//    private static HttpEntity<MultiValueMap<String, String>> getMultiValueMapHttpEntity(String username, String password) {
-//        String clientId = "backend-gateway-client";
-//        String clientSecret = "5Rrlk1xQyoIg48Zva2WYgtgI4igWzg8z";
-//        String grantType = "password";
-//        String scope = "openid";
-//
-//        HttpHeaders httpHeaders = new HttpHeaders();
-//        httpHeaders.setBasicAuth(clientId, clientSecret);
-//
-//        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-//        map.add("grant_type", grantType);
-//        map.add("username", username);
-//        map.add("password", password);
-//        map.add("scope", scope);
-//
-//        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, httpHeaders);
-//        return request;
-//    }
-//
-//    @SneakyThrows
-//    private String getKeycloakAccessToken(String username, String password) {
-//        HttpEntity<MultiValueMap<String, String>> request = getMultiValueMapHttpEntity(username, password);
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//
-//        String URL = "http://backend-keycloak-auth:8080/auth/realms/ITM/protocol/openid-connect/token";
-//        ResponseEntity<String> responseEntity = restTemplate.postForEntity(URL, request, String.class);
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//        JsonNode node = mapper.readTree(responseEntity.getBody());
-//
-//        return node.get("access_token").asText();
-//    }
-//
-//
-//    private final String ACCESS_TOKEN = "Bearer " + getKeycloakAccessToken(USERNAME, PASSWORD);
 
 
     private RealmResource realmResource;
@@ -174,7 +119,7 @@ public class ControllerTest extends BaseIntegrationTest {
         userResource = mock(UserResource.class);
         userRepresentation = mock(UserRepresentation.class);
 
-        userRolesMock= mock(List.class);
+        userRolesMock = mock(List.class);
         userGroupsMock = mock(List.class);
 
     }
@@ -196,14 +141,15 @@ public class ControllerTest extends BaseIntegrationTest {
 //        assertThat(mvcResult.getContentLength());
         verify(usersResource).create(any(UserRepresentation.class));
     }
+
     @Test
     @SneakyThrows
     public void validationErrorWhenCreatedUserByModerator() {
         UserRequest request = new UserRequest("g", "", "g", "Gleb", "Emelyanov");
-            mvc.perform(requestWithContent(post("/api/users"),
-                    request)).andDo(print()).andExpect(status().is(400)).andReturn().getResponse();
+        mvc.perform(requestWithContent(post("/api/users"),
+                request)).andDo(print()).andExpect(status().is(400)).andReturn().getResponse();
 
-        }
+    }
 
 
     @Test
@@ -216,7 +162,7 @@ public class ControllerTest extends BaseIntegrationTest {
 
 
     @Test
-    public void getUserByIdByModerator() throws Exception {
+    public void successfulGetUserByIdByModerator() throws Exception {
         String id = "3d40251d-829c-454e-b389-ec5e9c38a4cc";
         when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
         when(realmResource.users()).thenReturn(usersResource);
@@ -229,14 +175,28 @@ public class ControllerTest extends BaseIntegrationTest {
                 .andExpect(status().is(500))
                 .andDo(print());
 
-                /**Рабочий вариант, но ждем 500ую вместо ролей и групп, потомучто они не заданы*/
+        /**Рабочий вариант, но ждем 500ую вместо ролей и групп, потомучто они не заданы*/
 
-            /**не рабочий вариант но с попыткой реализовать листы ролей и групп*/
+        /**не рабочий вариант но с попыткой реализовать листы ролей и групп*/
 //        Mockito.when(keycloak.realm(Mockito.anyString()).users().get(Mockito.anyString()).roles().getAll().getRealmMappings())
 //                .thenReturn(userRolesMock);
 //        Mockito.when(keycloak.realm(Mockito.anyString()).users().get(Mockito.anyString()).groups())
 //                .thenReturn(userGroupsMock);
-
     }
 
+    @Test
+    public void unsuccessfulGetUserByIdByModerator() throws Exception {
+        String id = null;
+        when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
+        when(realmResource.users()).thenReturn(usersResource);
+
+        when(realmResource.users().get(eq(id))).thenReturn(userResource);
+        when(userResource.toRepresentation()).thenReturn(userRepresentation);
+        when(userRepresentation.getId()).thenReturn(id);
+
+        this.mvc.perform(get("/api/users/{id}", id))
+                .andExpect(status().is(404))
+                .andDo(print());
+
+    }
 }

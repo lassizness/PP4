@@ -43,7 +43,6 @@ public class UserController {
     @Secured("ROLE_MODERATOR")
     @SecurityRequirement(name = "oauth2_auth_code")
     public String hello() {
-        return SecurityContextHolder.getContext().getAuthentication().getName(); // Возвращается имя аутентифицированного пользователя,
-
+        return SecurityContextHolder.getContext().getAuthentication().getName(); // Возвращается имя аутентифицированного пользователя
     }
 }
