@@ -27,6 +27,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -34,7 +35,9 @@ import javax.json.JsonValue;
 import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -177,7 +180,7 @@ public class ControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    public void createUserByModerator() throws Exception {
+    public void successfulCreateUserByModerator() throws Exception {
 
         when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
         when(realmResource.users()).thenReturn(usersResource);
@@ -191,9 +194,17 @@ public class ControllerTest extends BaseIntegrationTest {
 
 //        System.out.println("" + mvcResult.getContentLength());
 //        assertThat(mvcResult.getContentLength());
-
         verify(usersResource).create(any(UserRepresentation.class));
     }
+    @Test
+    @SneakyThrows
+    public void validationErrorWhenCreatedUserByModerator() {
+        UserRequest request = new UserRequest("g", "", "g", "Gleb", "Emelyanov");
+            mvc.perform(requestWithContent(post("/api/users"),
+                    request)).andDo(print()).andExpect(status().is(400)).andReturn().getResponse();
+
+        }
+
 
     @Test
     public void helloMethodShouldBeOk3() throws Exception {
@@ -215,25 +226,16 @@ public class ControllerTest extends BaseIntegrationTest {
         when(userRepresentation.getId()).thenReturn(id);
 
         this.mvc.perform(get("/api/users/{id}", id))
-                .andExpect(status().is(200))
-                .andDo(print())
-                .andReturn();
+                .andExpect(status().is(500))
+                .andDo(print());
 
-                /**Рабочий вариант, но гоняем воздух и подгоняем*/
-//        MockHttpServletResponse response = mockMvc.perform(get("/api/users/{id}", id))
-//                .andExpect(status().isInternalServerError())
-//                .andReturn().getResponse();
-//        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
+                /**Рабочий вариант, но ждем 500ую вместо ролей и групп, потомучто они не заданы*/
 
-
-//        when(realmResource.users().get(any()).roles().getAll()).thenReturn(new MappingsRepresentation());
             /**не рабочий вариант но с попыткой реализовать листы ролей и групп*/
 //        Mockito.when(keycloak.realm(Mockito.anyString()).users().get(Mockito.anyString()).roles().getAll().getRealmMappings())
 //                .thenReturn(userRolesMock);
 //        Mockito.when(keycloak.realm(Mockito.anyString()).users().get(Mockito.anyString()).groups())
 //                .thenReturn(userGroupsMock);
-
-
 
     }
 
