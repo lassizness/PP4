@@ -1,14 +1,16 @@
 package com.itm.space.backendresources;
 
 import com.itm.space.backendresources.api.request.UserRequest;
-import com.itm.space.backendresources.api.response.UserResponse;
+import com.itm.space.backendresources.exception.BackendResourcesException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RoleMappingResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.MappingsRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +50,6 @@ public class ControllerTest extends BaseIntegrationTest {
     private final String USERNAME = "gleb";
     private final String PASSWORD = "gleb";
 
-    public ControllerTest() {
-    }
     //    @BeforeEach
 //НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
 
@@ -74,12 +74,11 @@ public class ControllerTest extends BaseIntegrationTest {
     private RealmResource realmResource;
     private UsersResource usersResource;
     private Response response;
-
     private UserRequest userRequest;
-    private UserResponse userResponce;
-
     private UserResource userResource;
     private UserRepresentation userRepresentation;
+
+
 
     @BeforeEach
     void init() {
@@ -89,16 +88,16 @@ public class ControllerTest extends BaseIntegrationTest {
         userRequest = new UserRequest("gleb", "test@mail.ru", "gleb", "Gleb", "Emelyanov");
         userResource = mock(UserResource.class);
         userRepresentation = mock(UserRepresentation.class);
+
+
     }
 
     @Test
     public void successfulCreateUserByModerator() throws Exception {
-
         when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
         when(realmResource.users()).thenReturn(usersResource);
         when(usersResource.create(ArgumentMatchers.any(UserRepresentation.class))).thenReturn(response);
         when(response.getStatusInfo()).thenReturn(Response.Status.CREATED);
-
         this.mvc.perform(requestWithContent(post("/api/users"), userRequest))
                 .andExpect(status().is(200))
                 .andDo(print())
@@ -111,10 +110,19 @@ public class ControllerTest extends BaseIntegrationTest {
     public void validationErrorWhenCreatedUserByModerator() {
         UserRequest request = new UserRequest("g", "", "g", "Gleb", "Emelyanov");
         mvc.perform(requestWithContent(post("/api/users"),
-                request))
+                        request))
                 .andDo(print())
                 .andExpect(status().is(400))
                 .andReturn().getResponse();
+    }
+
+    @Test
+    @SneakyThrows
+    public void createUserByModeratorShouldThrowException(){
+        when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
+        when(realmResource.users()).thenReturn(usersResource);
+        when(usersResource.create(ArgumentMatchers.any(UserRepresentation.class))).thenReturn(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
+        mvc.perform(requestWithContent(post("/api/users"),userRequest)).andExpect(status().is(500));
     }
 
     @Test
@@ -131,12 +139,24 @@ public class ControllerTest extends BaseIntegrationTest {
         when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
         when(realmResource.users()).thenReturn(usersResource);
         when(realmResource.users().get(eq(id))).thenReturn(userResource);
-        when(userResource.toRepresentation()).thenReturn(userRepresentation);
+        when(userResource.roles()).thenReturn(mock(RoleMappingResource.class));
         when(userRepresentation.getId()).thenReturn(id);
+        when(userResource.roles().getAll()).thenReturn(mock(MappingsRepresentation.class));
+        when(userResource.toRepresentation()).thenReturn(userRepresentation);
+
+        this.mvc.perform(get("/api/users/{id}", id))
+                .andExpect(status().is(200))
+                .andDo(print());
+    }
+    @Test
+    public void exceptionGetUserByIdByModerator() throws Exception {
+        String id = "3d40251d-829c-454e-b389-ec5e9c38a4cc";
+        when(keycloak.realm(ArgumentMatchers.anyString())).thenReturn(realmResource);
+        when(realmResource.users()).thenReturn(usersResource);
+        when(realmResource.users().get(eq(id))).thenThrow(new BackendResourcesException("message", HttpStatus.INTERNAL_SERVER_ERROR));
         this.mvc.perform(get("/api/users/{id}", id))
                 .andExpect(status().is(500))
                 .andDo(print());
-        /**Рабочий вариант, юзер ловится по ID, но ждем 500ую вместо ролей и групп, потомучто они не заданы*/
     }
 
     @Test
@@ -149,5 +169,4 @@ public class ControllerTest extends BaseIntegrationTest {
                 .andExpect(status().is(404))
                 .andDo(print());
     }
-    /**Рабочий вариант, подается не валидный ID и ожидаю ошибку*/
 }

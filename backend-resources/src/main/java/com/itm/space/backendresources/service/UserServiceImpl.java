@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private final Keycloak keycloakClient;
     private final UserMapper userMapper;
 
-    @Value("${keycloak.realm}") // указывает, что поле realm будет получать значение из конфигурационного файла или другого источника с помощью выражения ${keycloak.realm}. Значение будет внедрено в поле realm при создании экземпляра класса.
+    @Value("${keycloak.realm}")
     private String realm;
 
     public void createUser(UserRequest userRequest) {
@@ -53,7 +53,8 @@ public class UserServiceImpl implements UserService {
         try {
             userRepresentation = keycloakClient.realm(realm).users().get(String.valueOf(id)).toRepresentation();
             userRoles = keycloakClient.realm(realm)
-                    .users().get(String.valueOf(id)).roles().getAll().getRealmMappings();
+                    .users().get(String.valueOf(id))
+                    .roles().getAll().getRealmMappings();
             userGroups = keycloakClient.realm(realm).users().get(String.valueOf(id)).groups();
         } catch (RuntimeException ex) {
             log.error("Exception on \"getUserById\": ", ex);
