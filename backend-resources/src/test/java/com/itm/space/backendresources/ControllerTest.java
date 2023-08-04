@@ -47,16 +47,8 @@ public class ControllerTest extends BaseIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final String USERNAME = "gleb";
-    private final String PASSWORD = "gleb";
-
-    //    @BeforeEach
-//НЕ СТАТИК метод должен выполняться перед каждым методом @Test, @RepeatedTest, @ParameterizedTest, или @TestFactory в текущем классе.
-
     @Test
     @SneakyThrows
-    //позволяет обрабатывать проверяемые исключения как непроверяемые исключения (unchecked exceptions). Она автоматически оборачивает
-    // проверяемые исключения в RuntimeException, чтобы не требовать явного обработчика исключений или объявления их в сигнатуре метода.
     public void helloMethodShouldBeOk1() {
         MockHttpServletResponse response = mockMvc.perform(get("/api/users/hello")).andReturn().getResponse();
         assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -78,8 +70,6 @@ public class ControllerTest extends BaseIntegrationTest {
     private UserResource userResource;
     private UserRepresentation userRepresentation;
 
-
-
     @BeforeEach
     void init() {
         realmResource = mock(RealmResource.class);
@@ -88,8 +78,6 @@ public class ControllerTest extends BaseIntegrationTest {
         userRequest = new UserRequest("gleb", "test@mail.ru", "gleb", "Gleb", "Emelyanov");
         userResource = mock(UserResource.class);
         userRepresentation = mock(UserRepresentation.class);
-
-
     }
 
     @Test
