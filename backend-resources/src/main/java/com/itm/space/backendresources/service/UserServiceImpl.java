@@ -63,12 +63,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.userRepresentationToUserResponse(userRepresentation, userRoles, userGroups);
     }
 
-    private CredentialRepresentation preparePasswordRepresentation(String password) { //Метод будет использоваться для подготовки представления пароля.
-        CredentialRepresentation credentialRepresentation = new CredentialRepresentation(); //Создается новый объект CredentialRepresentation и сохраняется в переменную credentialRepresentation.
-        credentialRepresentation.setTemporary(false); //Устанавливается значение false для свойства temporary объекта credentialRepresentation. Это означает, что пароль не является временным.
-        credentialRepresentation.setType(CredentialRepresentation.PASSWORD); //станавливается тип PASSWORD для свойства type объекта credentialRepresentation. Это указывает, что представление пароля является представлением пароля.
-        credentialRepresentation.setValue(password); //Устанавливается значение password для свойства value объекта credentialRepresentation. Это устанавливает значение пароля в представлении пароля.
-        return credentialRepresentation; //Возвращается объект credentialRepresentation, который содержит подготовленное представление пароля.
+    private CredentialRepresentation preparePasswordRepresentation(String password) {
+        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+        credentialRepresentation.setTemporary(false);
+        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        credentialRepresentation.setValue(password);
+        return credentialRepresentation;
     }
 
     private UserRepresentation prepareUserRepresentation(UserRequest userRequest,

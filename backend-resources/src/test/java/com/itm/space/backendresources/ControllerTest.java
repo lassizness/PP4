@@ -14,7 +14,6 @@ import org.keycloak.representations.idm.MappingsRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -41,8 +40,6 @@ public class ControllerTest extends BaseIntegrationTest {
 
     @MockBean
     private Keycloak keycloak;
-    @Value("${keycloak.realm}")
-    private String realm;
 
     @Autowired
     private MockMvc mockMvc;
